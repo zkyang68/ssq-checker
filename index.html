@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>双色球开奖查询 - 对照 04 07 08 11 12 28 | 06</title>
+<style>
+  :root {
+    --bg: #f5f5f5;
+    --card: #fff;
+    --text: #222;
+    --sub: #888;
+    --red: #dc3545;
+    --blue: #0d6efd;
+    --gold: #f0a500;
+    --win-bg: #fffdf0;
+    --border: #e0e0e0;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 16px 20px; }
+
+  /* 顶部标题栏 */
+  .topbar { background: linear-gradient(135deg, #c41e3a 0%, #a01830 100%); color: #fff; padding: 20px 24px; border-radius: 16px; margin-bottom: 16px; text-align: center; }
+  .topbar h1 { font-size: 24px; letter-spacing: 2px; }
+  .topbar .sub { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+
+  /* 我的号码卡片 */
+  .my-number { background: #fff; border: 2px solid #c41e3a; border-radius: 16px; padding: 20px 24px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .my-number .tag { color: #c41e3a; font-weight: 700; font-size: 15px; white-space: nowrap; }
+  .ball { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; font-size: 18px; font-weight: 700; color: #fff; }
+  .ball.r { background: radial-gradient(circle at 35% 35%, #f05a6e, #b52b3d); }
+  .ball.b { background: radial-gradient(circle at 35% 35%, #5ba3f5, #1a5db0); }
+  .sep { font-size: 22px; font-weight: 300; color: #aaa; margin: 0 2px; }
+
+  /* 统计卡片 */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .stat { background: var(--card); border-radius: 12px; padding: 18px 16px; text-align: center; box-shadow: var(--shadow); }
+  .stat .num { font-size: 30px; font-weight: 700; }
+  .stat .lbl { font-size: 12px; color: var(--sub); margin-top: 2px; }
+  .stat.win .num { color: #dc3545; }
+  .stat.prize .num { color: #f0a500; }
+  .stat.cost .num { color: #0d6efd; }
+
+  /* 控制栏 */
+  .toolbar { display: flex; gap: 10px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+  .btn { padding: 9px 18px; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+  .btn-primary { background: #c41e3a; color: #fff; }
+  .btn-primary:hover { background: #a01830; }
+  .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+  .btn-outline { background: #fff; color: #c41e3a; border: 1px solid #c41e3a; }
+  .btn-outline:hover { background: #fef5f6; }
+  .badge { display: inline-block; background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+  .badge.warn { background: #fff3cd; color: #856404; }
+
+  /* 表格区域 */
+  .table-card { background: var(--card); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+  .scroll { overflow-x: auto; max-height: 65vh; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { position: sticky; top: 0; z-index: 5; }
+  th { background: #fafafa; padding: 10px 8px; text-align: center; font-weight: 600; color: #666; border-bottom: 2px solid #eee; white-space: nowrap; font-size: 12px; }
+  td { padding: 9px 6px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+  tr.win { background: #fffef5; }
+  tr.win:hover { background: #fff8d6; }
+  tr:hover { background: #fafafa; }
+  tr.new-draw { border-left: 3px solid #2e7d32; }
+  .mini { display: inline-block; width: 28px; height: 28px; border-radius: 50%; line-height: 28px; font-size: 12px; font-weight: 700; color: #fff; margin: 0 2px; }
+  .mini.r { background: #dc3545; }
+  .mini.b { background: #0d6efd; }
+  .mini.r.hit, .mini.b.hit { box-shadow: 0 0 0 3px #f0a500, 0 0 0 5px rgba(240,165,0,0.3); }
+  .tier { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .t1 { background: #fff3cd; color: #856404; }
+  .t2 { background: #e9ecef; color: #495057; }
+  .t3 { background: #fdebd0; color: #935116; }
+  .t4 { background: #d5f5e3; color: #1e8449; }
+  .t5 { background: #d6eaf8; color: #1a5276; }
+  .t6 { background: #f4ecf7; color: #6c3483; }
+  .no-win { color: #bbb; font-size: 12px; }
+  .prz { font-weight: 700; white-space: nowrap; }
+
+  /* 加载 & 错误 */
+  .loading { display: flex; align-items: center; justify-content: center; padding: 60px; }
+  .spin { width: 36px; height: 36px; border: 3px solid #eee; border-top-color: #c41e3a; border-radius: 50%; animation: s 0.8s linear infinite; }
+  @keyframes s { to { transform: rotate(360deg); } }
+  .err-msg { background: #fff3cd; border: 1px solid #ffc107; border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; font-size: 13px; }
+  .err-msg code { background: #f8f9fa; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+
+  /* 高亮提示 */
+  .highlight-banner { background: linear-gradient(135deg, #fff9c4, #fff3cd); border: 1px solid #f0a500; border-radius: 12px; padding: 14px 20px; margin-bottom: 14px; display: none; }
+  .highlight-banner .title { font-weight: 700; color: #856404; }
+  .highlight-banner .content { color: #6d5308; font-size: 13px; margin-top: 4px; }
+
+  .footer { text-align: center; padding: 20px; color: #aaa; font-size: 11px; }
+
+  @media (max-width: 768px) {
+    .container { padding: 8px; }
+    .topbar h1 { font-size: 18px; }
+    .ball { width: 36px; height: 36px; font-size: 15px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stat .num { font-size: 22px; }
+    table { font-size: 11px; }
+    th, td { padding: 6px 4px; }
+    .mini { width: 24px; height: 24px; line-height: 24px; font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 顶部 -->
+  <div class="topbar">
+    <h1>双色球 开奖号码查询</h1>
+    <div class="sub">每期自动对照 &nbsp;|&nbsp; 周二·周四·周日开奖 &nbsp;|&nbsp; 数据自 2026-05-12 起持续保存</div>
+  </div>
+
+  <!-- 我的号码 -->
+  <div class="my-number">
+    <span class="tag">我的号码</span>
+    <span class="ball r">04</span>
+    <span class="ball r">07</span>
+    <span class="ball r">08</span>
+    <span class="ball r">11</span>
+    <span class="ball r">12</span>
+    <span class="ball r">28</span>
+    <span class="sep">+</span>
+    <span class="ball b">06</span>
+  </div>
+
+  <!-- 统计 -->
+  <div class="stats">
+    <div class="stat"><div class="num" id="sTotal">-</div><div class="lbl">已追踪期数（5/12起）</div></div>
+    <div class="stat win"><div class="num" id="sWin">-</div><div class="lbl">中奖次数</div></div>
+    <div class="stat prize"><div class="num" id="sPrize">-</div><div class="lbl">累计中奖（元）</div></div>
+    <div class="stat cost"><div class="num" id="sCost">-</div><div class="lbl">累计投入（元）</div></div>
+    <div class="stat"><div class="num" id="sNet" style="font-size:22px;">-</div><div class="lbl">净收益（元）</div></div>
+  </div>
+
+  <!-- 最近中奖横幅 -->
+  <div class="highlight-banner" id="banner">
+    <div class="title">🏆 最新中奖</div>
+    <div class="content" id="bannerContent"></div>
+  </div>
+
+  <!-- 工具栏 -->
+  <div class="toolbar">
+    <button class="btn btn-primary" id="btnRefresh" onclick="refreshData()">🔄 刷新数据</button>
+    <button class="btn btn-outline" onclick="clearAndReload()">🗑 清空本地数据</button>
+    <span id="statusBadge"></span>
+    <span style="margin-left:auto;font-size:12px;color:#888;" id="lastUpdate"></span>
+  </div>
+
+  <!-- 表格 -->
+  <div class="table-card">
+    <div class="scroll">
+      <div class="loading" id="spinner"><div class="spin"></div></div>
+      <table id="table" style="display:none;">
+        <thead>
+          <tr>
+            <th>期号</th>
+            <th>日期</th>
+            <th>红球</th>
+            <th>蓝球</th>
+            <th>匹配红球</th>
+            <th>蓝球</th>
+            <th>中奖结果</th>
+            <th>奖金</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    浮动奖等：一等奖约500万+、二等奖约20万+（以当期实际派奖为准）&nbsp;|&nbsp;
+    固定奖等：三等奖3000元、四等奖200元、五等奖10元、六等奖5元
+  </div>
+</div>
+
+<script>
+// ==================== 配置 ====================
+const USER = {
+  reds: [4, 7, 8, 11, 12, 28],
+  blue: 6
+};
+const TRACK_START = '2026-05-12';  // 购买起始日期
+const PAGE_SIZE = 100;
+const STORAGE_KEY = 'ssq_tracker_data';
+const STORAGE_VER = 1;
+
+// ==================== localStorage ====================
+function loadStore() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const obj = JSON.parse(raw);
+      if (obj && obj.version === STORAGE_VER) return obj;
+    }
+  } catch(e) {}
+  return { version: STORAGE_VER, draws: {}, updatedAt: null };
+}
+
+function saveStore(store) {
+  store.updatedAt = new Date().toISOString();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  } catch(e) {
+    console.warn('localStorage write failed, maybe full');
+  }
+}
+
+// ==================== 中奖规则 ====================
+function checkWin(reds, blue) {
+  const mr = USER.reds.filter(r => reds.includes(r)).length;
+  const mb = USER.blue === blue;
+
+  if (mr === 6 && mb)  return { tier: 1, name: '一等奖', prize: '浮动 ~500万+', num: 5000000, cls: 't1' };
+  if (mr === 6 && !mb) return { tier: 2, name: '二等奖', prize: '浮动 ~20万+', num: 200000, cls: 't2' };
+  if (mr === 5 && mb)  return { tier: 3, name: '三等奖', prize: '3,000元', num: 3000, cls: 't3' };
+  if ((mr === 5 && !mb) || (mr === 4 && mb)) return { tier: 4, name: '四等奖', prize: '200元', num: 200, cls: 't4' };
+  if ((mr === 4 && !mb) || (mr === 3 && mb)) return { tier: 5, name: '五等奖', prize: '10元', num: 10, cls: 't5' };
+  if (mb && mr <= 2) return { tier: 6, name: '六等奖', prize: '5元', num: 5, cls: 't6' };
+  return null;
+}
+
+// ==================== 数据加载 ====================
+// 主数据源：data/draws.json（由 GitHub Action 每期自动更新，同源无跨域）
+async function loadFromJSON() {
+  const resp = await fetch('data/draws.json?' + Date.now());
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const data = await resp.json();
+  if (!data || !Array.isArray(data.draws)) throw new Error('格式异常');
+  return data.draws;
+}
+
+// 备用：直接请求 500 源（仅用于 data.json 不可用时）
+async function loadFromSource() {
+  const y = new Date().getFullYear();
+  const prefix = y % 100;
+  const start = prefix * 1000 + 1;
+  const end = prefix * 1000 + 160;
+  const url = `https://datachart.500.com/ssq/history/newinc/history.php?start=${start}&end=${end}`;
+  const resp = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const html = await resp.text();
+
+  // 简易 HTML 解析（仅作 fallback）
+  html.replace(/<!--[\s\S]*?-->/g, '');
+  const draws = [];
+  const rowRe = /<tr\s+class="t_tr\d">([\s\S]*?)<\/tr>/gi;
+  let m;
+  while ((m = rowRe.exec(html)) !== null) {
+    const cells = [];
+    const tdRe = /<td[^>]*>([\s\S]*?)<\/td>/gi;
+    let cm;
+    while ((cm = tdRe.exec(m[1])) !== null) {
+      cells.push(cm[1].replace(/<[^>]+>/g, '').trim());
+    }
+    if (cells.length < 16) continue;
+    const code = cells[0];
+    if (!/^\d{5}$/.test(code)) continue;
+    const reds = [];
+    for (let i = 1; i <= 6; i++) {
+      const n = parseInt(cells[i], 10);
+      if (!n || n < 1 || n > 33) { reds.length = 0; break; }
+      reds.push(n);
+    }
+    if (reds.length !== 6) continue;
+    const blue = parseInt(cells[7], 10);
+    if (!blue || blue < 1 || blue > 16) continue;
+    const date = cells[15];
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+    draws.push({ code, date, reds: reds.sort((a,b)=>a-b), blue });
+  }
+  if (!draws.length) throw new Error('解析无数据');
+  return draws;
+}
+
+// ==================== 渲染 ====================
+function render(store, draws) {
+  const sorted = draws.sort((a,b) => b.code.localeCompare(a.code));
+
+  // 表格只展示最近 20 期
+  const displayDraws = sorted.slice(0, 20);
+  let newestWin = null;
+
+  const tbody = document.getElementById('tbody');
+  let html = '';
+  for (const d of displayDraws) {
+    const w = checkWin(d.reds, d.blue);
+    const isTracked = d.date >= TRACK_START;
+
+    if (w && isTracked) {
+      if (!newestWin || d.code > newestWin.code) newestWin = { ...d, result: w };
+    }
+
+    const matchedReds = USER.reds.filter(r => d.reds.includes(r));
+
+    html += `<tr class="${w ? 'win' : ''}${isTracked ? ' new-draw' : ''}">`;
+    html += `<td><strong>${d.code}</strong>${isTracked ? ' <span style="color:#2e7d32;font-size:10px;">●</span>' : ''}</td>`;
+    html += `<td>${d.date}</td>`;
+    html += `<td>${d.reds.map(r => {
+      const hit = USER.reds.includes(r);
+      return `<span class="mini r${hit ? ' hit' : ''}">${String(r).padStart(2,'0')}</span>`;
+    }).join('')}</td>`;
+    html += `<td><span class="mini b${USER.blue === d.blue ? ' hit' : ''}">${String(d.blue).padStart(2,'0')}</span></td>`;
+    html += `<td>${matchedReds.length > 0 ? matchedReds.map(r => String(r).padStart(2,'0')).join(' ') : '-'}</td>`;
+    html += `<td>${USER.blue === d.blue ? '✅' : '❌'}</td>`;
+    if (w) {
+      html += `<td><span class="tier ${w.cls}">${w.name}</span></td>`;
+      html += `<td class="prz" style="color:#dc3545;">${w.prize}</td>`;
+    } else {
+      html += `<td class="no-win">未中奖</td>`;
+      html += `<td class="no-win">-</td>`;
+    }
+    html += '</tr>';
+  }
+
+  tbody.innerHTML = html;
+  document.getElementById('table').style.display = 'table';
+  document.getElementById('spinner').style.display = 'none';
+
+  // 统计：只统计 2026-05-12 起购买的期数
+  const tracked = sorted.filter(d => d.date >= TRACK_START);
+  let trackedWin = 0, trackedPrize = 0;
+  for (const d of tracked) {
+    const w = checkWin(d.reds, d.blue);
+    if (w) { trackedWin++; trackedPrize += w.num; }
+  }
+
+  const cost = tracked.length * 2;
+
+  document.getElementById('sTotal').textContent = tracked.length;
+  document.getElementById('sWin').textContent = trackedWin;
+  document.getElementById('sPrize').textContent = '¥' + trackedPrize.toLocaleString();
+  document.getElementById('sCost').textContent = '¥' + cost.toLocaleString();
+
+  const net = trackedPrize - cost;
+  const netEl = document.getElementById('sNet');
+  netEl.textContent = (net >= 0 ? '+' : '') + '¥' + net.toLocaleString();
+  netEl.style.color = net > 0 ? '#2e7d32' : net < 0 ? '#dc3545' : '#888';
+
+  // 横幅：仅追踪期内最新中奖
+  const banner = document.getElementById('banner');
+  if (newestWin) {
+    banner.style.display = 'block';
+    document.getElementById('bannerContent').textContent =
+      `第 ${newestWin.code} 期（${newestWin.date}）：${newestWin.result.name}，奖金 ${newestWin.result.prize}`;
+  } else {
+    banner.style.display = 'none';
+  }
+
+  // 状态
+  const badge = document.getElementById('statusBadge');
+  if (tracked.length > 0) {
+    badge.innerHTML = `<span class="badge">✅ 已买 ${tracked.length} 期，投入 ¥${cost}</span>`;
+  }
+  document.getElementById('lastUpdate').textContent =
+    '数据更新：' + new Date().toLocaleString('zh-CN', { hour12: false });
+
+  document.getElementById('btnRefresh').disabled = false;
+}
+
+// ==================== 主流程 ====================
+async function refreshData() {
+  const btn = document.getElementById('btnRefresh');
+  btn.disabled = true;
+  const spinner = document.getElementById('spinner');
+  spinner.style.display = 'flex';
+  document.getElementById('table').style.display = 'none';
+  document.getElementById('statusBadge').innerHTML =
+    '<span class="badge warn">⏳ 正在加载数据...</span>';
+
+  try {
+    const store = loadStore();
+
+    // 优先加载本地 JSON，够快且无跨域问题
+    let fetched;
+    try {
+      fetched = await loadFromJSON();
+      document.getElementById('statusBadge').innerHTML =
+        '<span class="badge">✅ 数据来源：本地 JSON</span>';
+    } catch {
+      // 备用：直接从 500 源抓取
+      fetched = await loadFromSource();
+      document.getElementById('statusBadge').innerHTML =
+        '<span class="badge warn">⚠️ 数据来源：在线抓取（JSON 不可用）</span>';
+    }
+
+    // 合并到 localStorage
+    for (const d of fetched) {
+      store.draws[d.code] = d;
+    }
+    saveStore(store);
+
+    // 渲染
+    const all = Object.values(store.draws);
+    render(store, all);
+  } catch(err) {
+    console.error(err);
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('btnRefresh').disabled = false;
+    document.getElementById('statusBadge').innerHTML =
+      '<span class="badge warn">❌ 加载失败，使用缓存数据</span>';
+
+    // 用缓存渲染
+    const store = loadStore();
+    const all = Object.values(store.draws);
+    if (all.length > 0) {
+      render(store, all);
+    } else {
+      document.getElementById('spinner').innerHTML =
+        '<div class="err-msg">⚠️ 无法获取数据。请稍后刷新页面重试。<br>' +
+        '<small>数据由 GitHub Action 每期自动更新到 data/draws.json，浏览器直接读取无需跨域。</small></div>';
+    }
+  }
+}
+
+function clearAndReload() {
+  if (!confirm('确定清空所有本地保存的彩票数据？此操作不可恢复。')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// ==================== 启动 ====================
+window.addEventListener('DOMContentLoaded', () => {
+  // 先用缓存渲染
+  const store = loadStore();
+  const cached = Object.values(store.draws);
+  if (cached.length > 0) {
+    render(store, cached);
+  }
+  // 然后拉取最新数据
+  refreshData();
+});
+</script>
+</body>
+</html>
