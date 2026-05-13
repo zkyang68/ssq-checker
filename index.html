@@ -279,41 +279,34 @@ async function loadFromSource() {
 
 // ==================== 渲染 ====================
 function render(store, draws) {
-  // 按日期降序排列
   const sorted = draws.sort((a,b) => b.code.localeCompare(a.code));
 
-  let totalWin = 0, winCount = 0, newestWin = null;
+  // 表格只展示最近 20 期
+  const displayDraws = sorted.slice(0, 20);
+  let newestWin = null;
 
   const tbody = document.getElementById('tbody');
   let html = '';
-  for (const d of sorted) {
+  for (const d of displayDraws) {
     const w = checkWin(d.reds, d.blue);
-    const isTracked = d.date >= TRACK_START; // 从今天起追踪
-    const rowClass = (w ? 'win' : '') + (isTracked ? ' new-draw' : '');
+    const isTracked = d.date >= TRACK_START;
 
-    if (w) {
-      winCount++;
-      totalWin += w.num;
+    if (w && isTracked) {
       if (!newestWin || d.code > newestWin.code) newestWin = { ...d, result: w };
     }
 
     const matchedReds = USER.reds.filter(r => d.reds.includes(r));
 
-    html += `<tr class="${rowClass}">`;
+    html += `<tr class="${w ? 'win' : ''}${isTracked ? ' new-draw' : ''}">`;
     html += `<td><strong>${d.code}</strong>${isTracked ? ' <span style="color:#2e7d32;font-size:10px;">●</span>' : ''}</td>`;
     html += `<td>${d.date}</td>`;
-    // 红球
     html += `<td>${d.reds.map(r => {
       const hit = USER.reds.includes(r);
       return `<span class="mini r${hit ? ' hit' : ''}">${String(r).padStart(2,'0')}</span>`;
     }).join('')}</td>`;
-    // 蓝球
     html += `<td><span class="mini b${USER.blue === d.blue ? ' hit' : ''}">${String(d.blue).padStart(2,'0')}</span></td>`;
-    // 匹配红球
     html += `<td>${matchedReds.length > 0 ? matchedReds.map(r => String(r).padStart(2,'0')).join(' ') : '-'}</td>`;
-    // 蓝球匹配
     html += `<td>${USER.blue === d.blue ? '✅' : '❌'}</td>`;
-    // 结果
     if (w) {
       html += `<td><span class="tier ${w.cls}">${w.name}</span></td>`;
       html += `<td class="prz" style="color:#dc3545;">${w.prize}</td>`;
@@ -328,7 +321,7 @@ function render(store, draws) {
   document.getElementById('table').style.display = 'table';
   document.getElementById('spinner').style.display = 'none';
 
-  // 统计（只统计追踪日期之后的期数）
+  // 统计：只统计 2026-05-12 起购买的期数
   const tracked = sorted.filter(d => d.date >= TRACK_START);
   let trackedWin = 0, trackedPrize = 0;
   for (const d of tracked) {
@@ -336,7 +329,6 @@ function render(store, draws) {
     if (w) { trackedWin++; trackedPrize += w.num; }
   }
 
-  // 投入金额：每期2元（双色球每注2元）
   const cost = tracked.length * 2;
 
   document.getElementById('sTotal').textContent = tracked.length;
@@ -349,7 +341,7 @@ function render(store, draws) {
   netEl.textContent = (net >= 0 ? '+' : '') + '¥' + net.toLocaleString();
   netEl.style.color = net > 0 ? '#2e7d32' : net < 0 ? '#dc3545' : '#888';
 
-  // 最新中奖横幅
+  // 横幅：仅追踪期内最新中奖
   const banner = document.getElementById('banner');
   if (newestWin) {
     banner.style.display = 'block';
@@ -362,11 +354,10 @@ function render(store, draws) {
   // 状态
   const badge = document.getElementById('statusBadge');
   if (tracked.length > 0) {
-    badge.innerHTML = `<span class="badge">✅ 已追踪 ${tracked.length} 期</span>`;
+    badge.innerHTML = `<span class="badge">✅ 已买 ${tracked.length} 期，投入 ¥${cost}</span>`;
   }
-
   document.getElementById('lastUpdate').textContent =
-    '最近更新：' + new Date().toLocaleString('zh-CN', { hour12: false });
+    '数据更新：' + new Date().toLocaleString('zh-CN', { hour12: false });
 
   document.getElementById('btnRefresh').disabled = false;
 }
