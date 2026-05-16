@@ -225,56 +225,13 @@ function checkWin(reds, blue) {
 }
 
 // ==================== 数据加载 ====================
-// 主数据源：data/draws.json（由 GitHub Action 每期自动更新，同源无跨域）
+// 数据由 GitHub Action 每期开奖后自动更新到 data/draws.json
 async function loadFromJSON() {
-  const resp = await fetch('data/draws.json?' + Date.now());
-  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const resp = await fetch('data/draws.json?t=' + Date.now());
+  if (!resp.ok) throw new Error(`JSON HTTP ${resp.status}`);
   const data = await resp.json();
-  if (!data || !Array.isArray(data.draws)) throw new Error('格式异常');
+  if (!data || !Array.isArray(data.draws)) throw new Error('JSON 格式异常');
   return data.draws;
-}
-
-// 备用：直接请求 500 源（仅用于 data.json 不可用时）
-async function loadFromSource() {
-  const y = new Date().getFullYear();
-  const prefix = y % 100;
-  const start = prefix * 1000 + 1;
-  const end = prefix * 1000 + 160;
-  const url = `https://datachart.500.com/ssq/history/newinc/history.php?start=${start}&end=${end}`;
-  const resp = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  const html = await resp.text();
-
-  // 简易 HTML 解析（仅作 fallback）
-  html.replace(/<!--[\s\S]*?-->/g, '');
-  const draws = [];
-  const rowRe = /<tr\s+class="t_tr\d">([\s\S]*?)<\/tr>/gi;
-  let m;
-  while ((m = rowRe.exec(html)) !== null) {
-    const cells = [];
-    const tdRe = /<td[^>]*>([\s\S]*?)<\/td>/gi;
-    let cm;
-    while ((cm = tdRe.exec(m[1])) !== null) {
-      cells.push(cm[1].replace(/<[^>]+>/g, '').trim());
-    }
-    if (cells.length < 16) continue;
-    const code = cells[0];
-    if (!/^\d{5}$/.test(code)) continue;
-    const reds = [];
-    for (let i = 1; i <= 6; i++) {
-      const n = parseInt(cells[i], 10);
-      if (!n || n < 1 || n > 33) { reds.length = 0; break; }
-      reds.push(n);
-    }
-    if (reds.length !== 6) continue;
-    const blue = parseInt(cells[7], 10);
-    if (!blue || blue < 1 || blue > 16) continue;
-    const date = cells[15];
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
-    draws.push({ code, date, reds: reds.sort((a,b)=>a-b), blue });
-  }
-  if (!draws.length) throw new Error('解析无数据');
-  return draws;
 }
 
 // ==================== 渲染 ====================
@@ -357,7 +314,7 @@ function render(store, draws) {
     badge.innerHTML = `<span class="badge">✅ 已买 ${tracked.length} 期，投入 ¥${cost}</span>`;
   }
   document.getElementById('lastUpdate').textContent =
-    '数据更新：' + new Date().toLocaleString('zh-CN', { hour12: false });
+    '更新：' + new Date().toLocaleString('zh-CN', { hour12: false });
 
   document.getElementById('btnRefresh').disabled = false;
 }
@@ -366,27 +323,12 @@ function render(store, draws) {
 async function refreshData() {
   const btn = document.getElementById('btnRefresh');
   btn.disabled = true;
-  const spinner = document.getElementById('spinner');
-  spinner.style.display = 'flex';
-  document.getElementById('table').style.display = 'none';
   document.getElementById('statusBadge').innerHTML =
-    '<span class="badge warn">⏳ 正在加载数据...</span>';
+    '<span class="badge warn">⏳ 正在刷新...</span>';
 
   try {
     const store = loadStore();
-
-    // 优先加载本地 JSON，够快且无跨域问题
-    let fetched;
-    try {
-      fetched = await loadFromJSON();
-      document.getElementById('statusBadge').innerHTML =
-        '<span class="badge">✅ 数据来源：本地 JSON</span>';
-    } catch {
-      // 备用：直接从 500 源抓取
-      fetched = await loadFromSource();
-      document.getElementById('statusBadge').innerHTML =
-        '<span class="badge warn">⚠️ 数据来源：在线抓取（JSON 不可用）</span>';
-    }
+    const fetched = await loadFromJSON();
 
     // 合并到 localStorage
     for (const d of fetched) {
@@ -394,25 +336,27 @@ async function refreshData() {
     }
     saveStore(store);
 
-    // 渲染
     const all = Object.values(store.draws);
     render(store, all);
+
+    document.getElementById('statusBadge').innerHTML =
+      '<span class="badge">✅ 最新数据</span>';
   } catch(err) {
     console.error(err);
-    document.getElementById('spinner').style.display = 'none';
     document.getElementById('btnRefresh').disabled = false;
-    document.getElementById('statusBadge').innerHTML =
-      '<span class="badge warn">❌ 加载失败，使用缓存数据</span>';
 
     // 用缓存渲染
     const store = loadStore();
-    const all = Object.values(store.draws);
-    if (all.length > 0) {
-      render(store, all);
+    const cached = Object.values(store.draws);
+    if (cached.length > 0) {
+      render(store, cached);
+      document.getElementById('statusBadge').innerHTML =
+        '<span class="badge warn">⚠️ 显示缓存数据</span>';
     } else {
+      document.getElementById('spinner').style.display = 'none';
       document.getElementById('spinner').innerHTML =
-        '<div class="err-msg">⚠️ 无法获取数据。请稍后刷新页面重试。<br>' +
-        '<small>数据由 GitHub Action 每期自动更新到 data/draws.json，浏览器直接读取无需跨域。</small></div>';
+        '<div class="err-msg">⚠️ 数据加载失败，请稍后刷新页面。<br>' +
+        '<small>开奖后 GitHub Action 会自动更新数据，届时刷新即可。</small></div>';
     }
   }
 }
@@ -425,13 +369,15 @@ function clearAndReload() {
 
 // ==================== 启动 ====================
 window.addEventListener('DOMContentLoaded', () => {
-  // 先用缓存渲染
+  // 立即用缓存渲染，保证页面秒开
   const store = loadStore();
   const cached = Object.values(store.draws);
   if (cached.length > 0) {
     render(store, cached);
+    document.getElementById('statusBadge').innerHTML =
+      '<span class="badge">📦 缓存数据，正在更新...</span>';
   }
-  // 然后拉取最新数据
+  // 后台拉取最新数据
   refreshData();
 });
 </script>

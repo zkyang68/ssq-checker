@@ -2,8 +2,8 @@ name: Update SSQ Data
 
 on:
   schedule:
-    # 每周二、四、日晚 22:00 北京时间 (UTC+8) = 14:00 UTC
-    - cron: '0 14 * * 2,4,0'
+    # 每二、四、日开奖后 21:30 北京时间 (UTC+8) = 13:30 UTC
+    - cron: '30 13 * * 2,4,0'
   workflow_dispatch:
   push:
     branches: [main, master]
